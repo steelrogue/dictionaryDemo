@@ -7,7 +7,6 @@ import java.net.URL;
 import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.List;
-import java.util.Set;
 import java.util.stream.Collectors;
 
 @Component
@@ -16,60 +15,56 @@ public class DictionaryConcatenator {
     @Autowired
     DictionaryParser dictionaryParser;
 
-    @Autowired
-    DictionaryFilter dictionaryFilter;
-
-    public HashSet<String> concatenateDictionary(URL path) {
-        List<HashSet<String>> filteredDictionary = dictionaryFilter.filterDictionary(path);
-
-        HashSet<String> lookupDictionarySet = filteredDictionary.get(filteredDictionary.size() - 1);
-        filteredDictionary.remove(filteredDictionary.size() - 1);
-
-        HashSet<String> concatedDictionary = new HashSet<>();
-        for(int i = 0; i < filteredDictionary.size(); i++) {
-            HashSet<String> dictionarySetWithLengthI = filteredDictionary.get(i);
-            HashSet<String> complementaryDictionarySet = filteredDictionary.get(filteredDictionary.size() - 1 - i);
-            dictionarySetWithLengthI.stream().forEach(x -> {
-                 complementaryDictionarySet.stream().forEach(y -> {
-                     String s = x + y;
-                    if(lookupDictionarySet.contains(s)){
-                        concatedDictionary.add(s);
-                    }
-                 });
-            });
-        }
-        return concatedDictionary;
-    }
-
-    public HashSet<String> concatenateDictionaryOptimized(URL path) {
+    /**
+     * Look for all six letter words which are composed of two concatenated smaller words
+     *
+     * @param path - URL path of textfile
+     * @return Set of all unique six letter words
+     */
+    public HashSet<String> concatenateDictionaryUniqueSet(URL path) {
         List<String> dictionary = dictionaryParser.parseDictionary(path);
 
+        // Get a list of all strings in dictionary with six letters
         List<String> lookupDictionarySet = dictionary.stream().filter(x -> x.length() == 6).collect(Collectors.toCollection(ArrayList::new));
+
+        // Get a list of all strings in dictionary with less than six letters
         HashSet<String> subsetDictionary = dictionary.stream().filter(x -> x.length() <= 5).collect(Collectors.toCollection(HashSet::new));
 
-        HashSet<String> result = lookupDictionarySet.stream().filter(x -> {
-            for(int i = 0; i < 5; i++) {
-                if (subsetDictionary.contains(x.substring(0,i+1)) && subsetDictionary.contains(x.substring(i+1,6)))
+        // Filter out all six letter words which are not composed of two concatenated smaller words
+        return lookupDictionarySet.stream().filter(x -> {
+            // Loop over all possible substring pairs for String x
+            for (int i = 0; i < 5; i++) {
+                if (subsetDictionary.contains(x.substring(0, i + 1)) && subsetDictionary.contains(x.substring(i + 1, 6)))
                     return true;
             }
             return false;
         }).collect(Collectors.toCollection(HashSet::new));
-        return result;
     }
 
-    public HashSet<DictionaryObject> concatenateDictionaryOptimized2(URL path) {
+    /**
+     * Look for all six letter words which are composed of two concatenated smaller words
+     *
+     * @param path - URL path of textfile
+     * @return Set of all unique six letter words and substring pairs
+     */
+    public HashSet<DictionaryObject> concatenateDictionaryObjectSet(URL path) {
         List<String> dictionary = dictionaryParser.parseDictionary(path);
 
+        // Get a list of all strings in dictionary with six letters
         List<String> lookupDictionarySet = dictionary.stream().filter(x -> x.length() == 6).collect(Collectors.toCollection(ArrayList::new));
+
+        // Get a list of all strings in dictionary with less than six letters
         HashSet<String> subsetDictionary = dictionary.stream().filter(x -> x.length() <= 5).collect(Collectors.toCollection(HashSet::new));
 
-        HashSet<DictionaryObject> result = lookupDictionarySet.stream().flatMap(x -> {
+        // FlatMap: get a stream of all substring pairs of all six letter strings
+        // Filter: Filter out all six letter words which are not composed of two concatenated smaller words
+        return lookupDictionarySet.stream().flatMap(x -> {
             List<DictionaryObject> list = new ArrayList<>();
-            for(int i = 0; i < 5; i++) {
-                list.add(new DictionaryObject(x, x.substring(0,i+1), x.substring(i+1,6)));
+            // Loop over all possible substring pairs for String x
+            for (int i = 0; i < 5; i++) {
+                list.add(new DictionaryObject(x, x.substring(0, i + 1), x.substring(i + 1, 6)));
             }
             return list.stream();
         }).filter(x -> subsetDictionary.contains(x.getSubString1()) && subsetDictionary.contains(x.getSubString2())).collect(Collectors.toCollection(HashSet::new));
-        return result;
     }
 }

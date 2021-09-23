@@ -2,15 +2,20 @@ package test.demo;
 
 import org.springframework.stereotype.Component;
 
-import javax.print.DocFlavor;
 import java.io.*;
 import java.net.URL;
 import java.util.ArrayList;
-import java.util.HashSet;
 import java.util.List;
 
 @Component
 public class DictionaryParser {
+
+    /**
+     * Parse textfile
+     *
+     * @param path - URL path of textfile
+     * @return List of all words in textfile
+     */
     public List<String> parseDictionary(URL path) {
         File file = new File(path.getPath());
         List<String> parsedDictionary = new ArrayList<>();
