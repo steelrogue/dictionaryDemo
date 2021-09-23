@@ -19,7 +19,7 @@ class DictionaryParserTests {
     void test() {
         URL url = getClass().getClassLoader().getResource("wordlist.txt");
         List<String> result = dictionaryParser.parseDictionary(url);
-        assertTrue(result != null);
+        assertNotNull(result);
         assertTrue(result.size() != 0);
         System.out.println("Result size is " + result.size());
     }
@@ -28,7 +28,7 @@ class DictionaryParserTests {
     void miniTest() {
         URL url = getClass().getClassLoader().getResource("wordlist.txt");
         List<String> result = dictionaryParser.parseDictionary(url);
-        assertTrue(result != null);
+        assertNotNull(result);
         assertTrue(result.size() != 0);
         System.out.println("Result size is " + result.size());
     }
